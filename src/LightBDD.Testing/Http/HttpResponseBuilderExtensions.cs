@@ -1,11 +1,18 @@
+using System;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace LightBDD.Testing.Http
 {
     public static class HttpResponseBuilderExtensions
     {
+        public static IHttpHandlerConfigurator Respond(this IHttpResponseBuilder builder, Action<HttpRequest, HttpResponse> respond)
+        {
+            return builder.Respond((req, rsp) => { respond(req, rsp); return Task.CompletedTask; });
+        }
+
         public static IHttpHandlerConfigurator RespondStatusCode(this IHttpResponseBuilder builder, HttpStatusCode code)
         {
             return builder.Respond((req, rsp) => rsp.SetStatusCode(code));

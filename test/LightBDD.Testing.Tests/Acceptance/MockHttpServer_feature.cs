@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -135,6 +136,47 @@ and configure it at runtime to mock requests")]
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/customer/123"),
                 _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
                 _ => Then_the_response_should_have_content("{\"name\":\"John\",\"id\":\"123\"}")
+            );
+        }
+
+        [Scenario]
+        public async Task Server_should_allow_mappings_that_would_expire_after_specified_amount_of_calls()
+        {
+            await Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Get, "/status", HttpStatusCode.OK),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_of_calls(HttpMethod.Get, "/status", HttpStatusCode.BadRequest, 2),
+
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK)
+            );
+        }
+
+        [Scenario]
+        public async Task Server_should_allow_mappings_that_would_expire_after_specified_time()
+        {
+            await Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Get, "/status", HttpStatusCode.OK),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_seconds(HttpMethod.Get, "/status", HttpStatusCode.BadRequest, 2),
+
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+
+                _ => When_time_elapses(TimeSpan.FromSeconds(2)),
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK)
             );
         }
     }

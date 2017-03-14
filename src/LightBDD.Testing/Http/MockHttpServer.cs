@@ -10,12 +10,17 @@ namespace LightBDD.Testing.Http
 {
     public class MockHttpServer : IDisposable
     {
+        private static readonly HttpRequestProcessor NotImplementedProcessor = new HttpRequestProcessor(r => true, (req, resp) =>
+        {
+            resp.SetStatusCode(HttpStatusCode.NotImplemented);
+            return Task.CompletedTask;
+        });
+
         public Uri BaseAddress { get; }
         private readonly HttpListener _listener;
-        private HttpRequestProcessor[] _processors = new HttpRequestProcessor[0];
-        private static readonly HttpRequestProcessor NotImplementedProcessor = new HttpRequestProcessor(r => true, (req, resp) => resp.SetStatusCode(HttpStatusCode.NotImplemented));
         private readonly Task _listenerTask;
         private readonly object _sync = new object();
+        private HttpRequestProcessor[] _processors = new HttpRequestProcessor[0];
         private readonly IDictionary<Guid, Task> _pendingTasks = new ConcurrentDictionary<Guid, Task>();
 
         public static MockHttpServer Start(int port) => Start(port, cfg => cfg);
@@ -44,7 +49,7 @@ namespace LightBDD.Testing.Http
                     var ctx = await _listener.GetContextAsync();
                     ScheduleProcessRequest(ctx);
                 }
-                catch(Exception) { }
+                catch (Exception) { }
             }
             await Task.WhenAll(_pendingTasks.Values);
         }
@@ -80,12 +85,12 @@ namespace LightBDD.Testing.Http
                 var request = new HttpRequest(ctx.Request, content, BaseAddress);
 
                 var processor = _processors.FirstOrDefault(p => p.Match(request)) ?? NotImplementedProcessor;
-                processor.ProcessRequest(request, response);
+                await processor.ProcessRequestAsync(request, response);
                 await response.SendResponseAsync();
             }
             catch (Exception)
             {
-                ctx.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+                ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             }
             finally
             {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using LightBDD.Testing.Http.Implementation;
 
 namespace LightBDD.Testing.Http
@@ -20,7 +21,7 @@ namespace LightBDD.Testing.Http
             return new HttpHandlerBuilder(this, predicate);
         }
 
-        internal MockHttpServerConfigurator Add(Func<HttpRequest, bool> predicate, Action<HttpRequest, HttpResponse> response)
+        internal MockHttpServerConfigurator Add(Func<HttpRequest, bool> predicate, Func<HttpRequest, HttpResponse, Task> response)
         {
             _processors.Add(new HttpRequestProcessor(predicate, response));
             return this;

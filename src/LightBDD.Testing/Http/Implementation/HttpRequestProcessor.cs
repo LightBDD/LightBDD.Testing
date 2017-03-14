@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace LightBDD.Testing.Http.Implementation
 {
     internal class HttpRequestProcessor
     {
         private readonly Func<HttpRequest, bool> _predicate;
-        private readonly Action<HttpRequest, HttpResponse> _processor;
+        private readonly Func<HttpRequest, HttpResponse, Task> _processor;
 
-        public HttpRequestProcessor(Func<HttpRequest, bool> predicate, Action<HttpRequest, HttpResponse> processor)
+        public HttpRequestProcessor(Func<HttpRequest, bool> predicate, Func<HttpRequest, HttpResponse, Task> processor)
         {
             _predicate = predicate;
             _processor = processor;
@@ -27,6 +28,6 @@ namespace LightBDD.Testing.Http.Implementation
             }
         }
 
-        public void ProcessRequest(HttpRequest request, HttpResponse response) => _processor(request, response);
+        public Task ProcessRequestAsync(HttpRequest request, HttpResponse response) => _processor(request, response);
     }
 }
