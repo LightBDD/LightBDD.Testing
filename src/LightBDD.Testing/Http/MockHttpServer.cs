@@ -73,21 +73,23 @@ namespace LightBDD.Testing.Http
 
         private async Task ProcessRequest(HttpListenerContext ctx)
         {
+            var response = new HttpResponse(ctx.Response);
             try
             {
                 var content = await ReadContentAsync(ctx);
                 var request = new HttpRequest(ctx.Request, content, BaseAddress);
-                var response = new HttpResponse(ctx.Response);
 
                 var processor = _processors.FirstOrDefault(p => p.Match(request)) ?? NotImplementedProcessor;
                 processor.ProcessRequest(request, response);
+                await response.SendResponseAsync();
             }
             catch (Exception)
             {
+                ctx.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
             }
             finally
             {
-                ctx.Response.Close();
+                response.Close();
             }
         }
 

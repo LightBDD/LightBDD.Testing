@@ -26,7 +26,7 @@ and configure it at runtime to mock requests")]
             await Runner.RunScenarioActionsAsync(
                 _ => Given_mock_http_server(),
                 _ => When_client_performs_METHOD_URL_request(new HttpMethod(method), "/not_configured_path"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.NotImplemented));
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.NotImplemented));
         }
 
         [Scenario]
@@ -38,12 +38,12 @@ and configure it at runtime to mock requests")]
                 _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Post, "/status", HttpStatusCode.Accepted),
 
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.OK),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Post, "/status"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.Accepted),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.Accepted),
 
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Put, "/status"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.NotImplemented)
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.NotImplemented)
                 );
         }
 
@@ -56,21 +56,21 @@ and configure it at runtime to mock requests")]
                 _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Get, "/customers", HttpStatusCode.OK),
 
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.OK),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/customers"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.OK),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
 
                 _ => When_server_reconfigures_METHOD_URL_to_return_status_code_and_DISCARD_others(HttpMethod.Get, "/status", HttpStatusCode.ServiceUnavailable, false),
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.ServiceUnavailable),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.ServiceUnavailable),
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/customers"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.OK),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
 
                 _ => When_server_reconfigures_METHOD_URL_to_return_status_code_and_DISCARD_others(HttpMethod.Get, "/customers", HttpStatusCode.BadRequest, true),
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/customers"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.BadRequest),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
                 _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.NotImplemented)
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.NotImplemented)
                 );
         }
 
@@ -89,10 +89,10 @@ and configure it at runtime to mock requests")]
                 _ => Given_mock_http_server(),
                 _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Post, "/password", HttpStatusCode.BadRequest),
                 _ => Given_server_configured_for_METHOD_URL_and_body_to_return_status_code(HttpMethod.Post, "/password", "magic_text", HttpStatusCode.Accepted),
-                _ => When_client_performs_METHOD_URL_request_with_body(HttpMethod.Post, "/password", "some_text"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.BadRequest),
-                _ => When_client_performs_METHOD_URL_request_with_body(HttpMethod.Post, "/password", "magic_text"),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.Accepted)
+                _ => When_client_performs_METHOD_URL_request_with_content(HttpMethod.Post, "/password", "some_text"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
+                _ => When_client_performs_METHOD_URL_request_with_content(HttpMethod.Post, "/password", "magic_text"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.Accepted)
                 );
         }
 
@@ -109,15 +109,33 @@ and configure it at runtime to mock requests")]
                 _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Post, "/customers", HttpStatusCode.BadRequest),
                 _ => Given_server_configured_for_METHOD_URL_and_json_body_to_return_status_code(HttpMethod.Post, "/customers", (JsonModel body) => body.Name == "John", HttpStatusCode.Accepted),
 
-                _ => When_client_performs_METHOD_URL_request_with_json_body(HttpMethod.Post, "/customers", new { Name = "Josh" }),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.BadRequest),
+                _ => When_client_performs_METHOD_URL_request_with_json_content(HttpMethod.Post, "/customers", new { Name = "Josh" }),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),
 
-                _ => When_client_performs_METHOD_URL_request_with_json_body(HttpMethod.Post, "/customers", new { Name = "John" }),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.Accepted),
+                _ => When_client_performs_METHOD_URL_request_with_json_content(HttpMethod.Post, "/customers", new { Name = "John" }),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.Accepted),
 
-                _ => When_client_performs_METHOD_URL_request_with_json_body(HttpMethod.Post, "/customers", new JsonModel { Name = "John" }),
-                _ => Then_the_response_should_has_status_code(HttpStatusCode.Accepted)
+                _ => When_client_performs_METHOD_URL_request_with_json_content(HttpMethod.Post, "/customers", new JsonModel { Name = "John" }),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.Accepted)
                 );
+        }
+
+        [Scenario]
+        public async Task Server_should_allow_configuring_responses_with_content()
+        {
+            await Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_with_content(HttpMethod.Get, "/status", HttpStatusCode.OK, "all good"),
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/status"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
+                _ => Then_the_response_should_have_content("all good"),
+
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_with_json_content(HttpMethod.Get, "/customer/123", HttpStatusCode.OK, new { name = "John", id = "123" }),
+                _ => When_client_performs_METHOD_URL_request(HttpMethod.Get, "/customer/123"),
+                _ => Then_the_response_should_have_status_code(HttpStatusCode.OK),
+                _ => Then_the_response_should_have_content("{\"name\":\"John\",\"id\":\"123\"}")
+            );
         }
     }
 }
