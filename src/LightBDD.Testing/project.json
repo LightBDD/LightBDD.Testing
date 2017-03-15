@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.0-*",
+  "version": "0.1.0", //build_ver
   
   "dependencies": {
     "LightBDD.Framework": "2.1.0",
@@ -11,5 +11,21 @@
         "System.Net.Http": { "type": "build" }
       }
     }
+  },
+  "authors": [ "Wojciech Kotlarski" ],
+  "description": "Provides utility classes simplifying acceptance testing",
+  "copyright": "Copyright © Wojciech Kotlarski 2017",
+  "packOptions": {
+    "iconUrl": "https://raw.githubusercontent.com/LightBDD/LightBDD/master/logo/lightbdd.png",
+    "licenseUrl": "http://opensource.org/licenses/BSD-2-Clause",
+    "projectUrl": "https://github.com/LightBDD/LightBDD.Testing",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/LightBDD/LightBDD.Testing"
+    },
+    "owners": [ "Wojciech Kotlarski" ],
+    "summary": "LightBDD Testing utility classes",
+    "tags": [ "bdd", "testing", "lightbdd" ],
+    "releaseNotes": "Added TestableHttpClient for Api tests and MockHttpServer for mocking external Apis"
   }
 }

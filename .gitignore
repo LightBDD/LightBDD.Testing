@@ -3,3 +3,7 @@ bin/
 obj/
 *.user
 *.lock.json
+packages/
+make/psmake.*/
+output/
+reports/
