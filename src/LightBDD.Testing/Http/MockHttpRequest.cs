@@ -6,11 +6,11 @@ using System.Text;
 
 namespace LightBDD.Testing.Http
 {
-    public class HttpRequest
+    public class MockHttpRequest
     {
         private readonly HttpListenerRequest _request;
 
-        internal HttpRequest(HttpListenerRequest request, byte[] content, Uri baseAddress)
+        internal MockHttpRequest(HttpListenerRequest request, byte[] content, Uri baseAddress)
         {
             Content = content;
             _request = request;

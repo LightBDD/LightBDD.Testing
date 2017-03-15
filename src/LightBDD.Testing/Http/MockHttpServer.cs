@@ -10,7 +10,7 @@ namespace LightBDD.Testing.Http
 {
     public class MockHttpServer : IDisposable
     {
-        private static readonly HttpRequestProcessor NotImplementedProcessor = new HttpRequestProcessor(r => true, (req, resp) =>
+        private static readonly MockHttpRequestProcessor NotImplementedProcessor = new MockHttpRequestProcessor(r => true, (req, resp) =>
         {
             resp.SetStatusCode(HttpStatusCode.NotImplemented);
             return Task.CompletedTask;
@@ -20,7 +20,7 @@ namespace LightBDD.Testing.Http
         private readonly HttpListener _listener;
         private readonly Task _listenerTask;
         private readonly object _sync = new object();
-        private HttpRequestProcessor[] _processors = new HttpRequestProcessor[0];
+        private MockHttpRequestProcessor[] _processors = new MockHttpRequestProcessor[0];
         private readonly IDictionary<Guid, Task> _pendingTasks = new ConcurrentDictionary<Guid, Task>();
 
         public static MockHttpServer Start(int port) => Start(port, cfg => cfg);
@@ -78,11 +78,11 @@ namespace LightBDD.Testing.Http
 
         private async Task ProcessRequest(HttpListenerContext ctx)
         {
-            var response = new HttpResponse(ctx.Response);
+            var response = new MockHttpResponse(ctx.Response);
             try
             {
                 var content = await ReadContentAsync(ctx);
-                var request = new HttpRequest(ctx.Request, content, BaseAddress);
+                var request = new MockHttpRequest(ctx.Request, content, BaseAddress);
 
                 var processor = _processors.FirstOrDefault(p => p.Match(request)) ?? NotImplementedProcessor;
                 await processor.ProcessRequestAsync(request, response);

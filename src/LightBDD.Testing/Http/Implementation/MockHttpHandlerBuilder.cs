@@ -4,19 +4,19 @@ using System.Threading.Tasks;
 
 namespace LightBDD.Testing.Http.Implementation
 {
-    internal class HttpHandlerBuilder : IHttpResponseBuilder, IHttpHandlerConfigurator
+    internal class MockHttpHandlerBuilder : IMockHttpResponseBuilder, IMockHttpHandlerConfigurator
     {
         private readonly MockHttpServerConfigurator _configurator;
-        private Func<HttpRequest, bool> _predicate;
-        private Func<HttpRequest, HttpResponse, Task> _response;
+        private Func<MockHttpRequest, bool> _predicate;
+        private Func<MockHttpRequest, MockHttpResponse, Task> _response;
 
-        public HttpHandlerBuilder(MockHttpServerConfigurator configurator, Func<HttpRequest, bool> predicate)
+        public MockHttpHandlerBuilder(MockHttpServerConfigurator configurator, Func<MockHttpRequest, bool> predicate)
         {
             _configurator = configurator;
             _predicate = predicate;
         }
 
-        public IHttpHandlerConfigurator Respond(Func<HttpRequest, HttpResponse, Task> response)
+        public IMockHttpHandlerConfigurator Respond(Func<MockHttpRequest, MockHttpResponse, Task> response)
         {
             _response = response;
             return this;
@@ -27,7 +27,7 @@ namespace LightBDD.Testing.Http.Implementation
             return _configurator.Add(_predicate, _response);
         }
 
-        public IHttpHandlerConfigurator ExpireAfterCallNumber(int maxCallNumber)
+        public IMockHttpHandlerConfigurator ExpireAfterCallNumber(int maxCallNumber)
         {
             var predicate = _predicate;
             var current = 0;
@@ -35,7 +35,7 @@ namespace LightBDD.Testing.Http.Implementation
             return this;
         }
 
-        public IHttpHandlerConfigurator ExpireAfterTime(TimeSpan maxTime)
+        public IMockHttpHandlerConfigurator ExpireAfterTime(TimeSpan maxTime)
         {
             var predicate = _predicate;
             var start = DateTimeOffset.UtcNow;

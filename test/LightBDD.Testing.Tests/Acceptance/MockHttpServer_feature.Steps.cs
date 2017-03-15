@@ -58,6 +58,24 @@ namespace LightBDD.Testing.Tests.Acceptance
             _server.Reconfigure(false, cfg => cfg.ForRequest(method, url).RespondStatusCode(code).Apply());
         }
 
+        private void Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_of_calls(HttpMethod method, string url, HttpStatusCode code, int number)
+        {
+            _server.Reconfigure(false, ctx =>
+                ctx.ForRequest(method, url)
+                    .RespondStatusCode(code)
+                    .ExpireAfterCallNumber(number)
+                    .Apply());
+        }
+
+        private void Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_seconds(HttpMethod method, string url, HttpStatusCode code, int number)
+        {
+            _server.Reconfigure(false, ctx =>
+                ctx.ForRequest(method, url)
+                    .RespondStatusCode(code)
+                    .ExpireAfterTime(TimeSpan.FromSeconds(number))
+                    .Apply());
+        }
+
         private void Given_server_configured_for_METHOD_URL_to_return_status_code_with_content(HttpMethod method, string url, HttpStatusCode code, string content)
         {
             _server.Reconfigure(false, cfg =>
@@ -132,24 +150,6 @@ namespace LightBDD.Testing.Tests.Acceptance
         private void When_server_reconfigures_METHOD_URL_to_return_status_code_and_DISCARD_others(HttpMethod method, string url, HttpStatusCode code, [FormatBoolean("discard", "preserve")] bool discard)
         {
             _server.Reconfigure(discard, cfg => cfg.ForRequest(method, url).RespondStatusCode(code).Apply());
-        }
-
-        private void Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_of_calls(HttpMethod method, string url, HttpStatusCode code, int number)
-        {
-            _server.Reconfigure(false, ctx =>
-                ctx.ForRequest(method, url)
-                    .RespondStatusCode(code)
-                    .ExpireAfterCallNumber(number)
-                    .Apply());
-        }
-
-        private void Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_seconds(HttpMethod method, string url, HttpStatusCode code, int number)
-        {
-            _server.Reconfigure(false, ctx =>
-                ctx.ForRequest(method, url)
-                    .RespondStatusCode(code)
-                    .ExpireAfterTime(TimeSpan.FromSeconds(number))
-                    .Apply());
         }
 
         private async void When_time_elapses(TimeSpan time)
