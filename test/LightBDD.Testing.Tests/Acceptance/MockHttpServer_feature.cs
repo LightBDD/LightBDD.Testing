@@ -108,7 +108,7 @@ and configure it at runtime to mock requests")]
             await Runner.RunScenarioActionsAsync(
                 _ => Given_mock_http_server(),
                 _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Post, "/customers", HttpStatusCode.BadRequest),
-                _ => Given_server_configured_for_METHOD_URL_and_json_body_to_return_status_code(HttpMethod.Post, "/customers", (JsonModel body) => body.Name == "John", HttpStatusCode.Accepted),
+                _ => Given_server_configured_for_METHOD_URL_and_json_content_to_return_status_code(HttpMethod.Post, "/customers", (JsonModel content) => content.Name == "John", HttpStatusCode.Accepted),
 
                 _ => When_client_performs_METHOD_URL_request_with_json_content(HttpMethod.Post, "/customers", new { Name = "Josh" }),
                 _ => Then_the_response_should_have_status_code(HttpStatusCode.BadRequest),

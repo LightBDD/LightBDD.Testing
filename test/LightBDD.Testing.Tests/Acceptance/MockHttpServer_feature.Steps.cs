@@ -42,13 +42,13 @@ namespace LightBDD.Testing.Tests.Acceptance
                     .Apply());
         }
 
-        private void Given_server_configured_for_METHOD_URL_and_json_body_to_return_status_code<T>(HttpMethod method, string url, Expression<Func<T, bool>> body, HttpStatusCode code)
+        private void Given_server_configured_for_METHOD_URL_and_json_content_to_return_status_code<T>(HttpMethod method, string url, Expression<Func<T, bool>> content, HttpStatusCode code)
         {
             _server.Reconfigure(false, cfg =>
                 cfg.ForRequest(
                         req =>
                             req.Method == method && req.RelativeUri == url &&
-                            body.Compile().Invoke(req.GetContentAsJson<T>()))
+                            content.Compile().Invoke(req.GetContentAsJson<T>()))
                     .RespondStatusCode(code)
                     .Apply());
         }
