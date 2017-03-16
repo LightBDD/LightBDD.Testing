@@ -4,9 +4,9 @@ using System.Net.Http.Headers;
 
 namespace LightBDD.Testing.Http.Implementation
 {
-    internal class TestableHttpResponseMessage : ITestableHttpResponseMessage
+    internal class TestableHttpResponse : ITestableHttpResponse
     {
-        public TestableHttpResponseMessage(HttpResponseMessage response, string content)
+        public TestableHttpResponse(HttpResponseMessage response, string content)
         {
             OriginalResponse = response;
             Content = content;

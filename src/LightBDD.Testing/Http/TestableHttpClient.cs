@@ -21,25 +21,25 @@ namespace LightBDD.Testing.Http
 
         public HttpRequestHeaders DefaultHeaders => _client.DefaultRequestHeaders;
 
-        public ITestableHttpResponseMessage LastResponse { get; private set; } = new NoTestableHttpResponseMessage();
+        public ITestableHttpResponse LastResponse { get; private set; } = new NoTestableHttpResponse();
 
-        public async Task<ITestableHttpResponseMessage> SendAsync(HttpRequestMessage request)
+        public async Task<ITestableHttpResponse> SendAsync(HttpRequestMessage request)
         {
-            return LastResponse = await TestableHttpResponseMessages.FromResponseAsync(await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead));
+            return LastResponse = await TestableHttpResponses.FromResponseAsync(await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead));
         }
-        public Task<ITestableHttpResponseMessage> GetAsync(string uri)
+        public Task<ITestableHttpResponse> GetAsync(string uri)
             => SendAsync(HttpMethod.Get, uri);
 
-        public Task<ITestableHttpResponseMessage> SendAsync(HttpMethod method, string uri)
+        public Task<ITestableHttpResponse> SendAsync(HttpMethod method, string uri)
             => SendAsync(new HttpRequestMessage { Method = method, RequestUri = new Uri(uri, UriKind.RelativeOrAbsolute) });
 
-        public Task<ITestableHttpResponseMessage> SendStringAsync(HttpMethod method, string uri, string content, Encoding encoding, string mediaType)
+        public Task<ITestableHttpResponse> SendStringAsync(HttpMethod method, string uri, string content, Encoding encoding, string mediaType)
             => SendAsync(new HttpRequestMessage { Method = method, RequestUri = new Uri(uri, UriKind.RelativeOrAbsolute), Content = new StringContent(content, encoding, mediaType) });
 
-        public Task<ITestableHttpResponseMessage> SendJsonStringAsync(HttpMethod method, string uri, string content)
+        public Task<ITestableHttpResponse> SendJsonStringAsync(HttpMethod method, string uri, string content)
             => SendStringAsync(method, uri, content, Encoding.UTF8, "application/json");
 
-        public Task<ITestableHttpResponseMessage> SendJsonAsync(HttpMethod method, string uri, object content, JsonSerializerSettings settings = null)
+        public Task<ITestableHttpResponse> SendJsonAsync(HttpMethod method, string uri, object content, JsonSerializerSettings settings = null)
             => SendJsonStringAsync(method, uri, JsonConvert.SerializeObject(content, settings));
 
         public void Dispose()

@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 namespace LightBDD.Testing.Http.Implementation
 {
-    internal class NoTestableHttpResponseMessage : ITestableHttpResponseMessage
+    internal class NoTestableHttpResponse : ITestableHttpResponse
     {
         public string Content { get { throw CreateException(); } }
         public HttpResponseHeaders Headers { get { throw CreateException(); } }

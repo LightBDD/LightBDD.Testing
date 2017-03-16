@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using LightBDD.Framework;
+using LightBDD.Framework.Commenting;
 using LightBDD.Testing.Http;
 using LightBDD.Testing.Http.Implementation;
 using LightBDD.Testing.Tests.Helpers;
@@ -79,6 +81,22 @@ namespace LightBDD.Testing.Tests.Acceptance
         private async void When_client_sends_METHOD_URL_request_with_json_content(HttpMethod method, string url, object content)
         {
             await _client.SendJsonAsync(method, url, content);
+        }
+
+        private void Then_attempt_to_validate_successful_response_code_should_end_with_exception_containing_actual_response_and_its_content_in_body()
+        {
+            var exception = Assert.Throws<TestableHttpResponseException>(() => _client.LastResponse.EnsureSuccessStatusCode());
+            StepExecution.Current.Comment(exception.Message);
+            Assert.NotNull(exception.ActualResponse);
+            Assert.Contains(exception.ActualResponse.Content, exception.Message);
+        }
+
+        private void Then_attempt_to_process_expected_successful_body_should_end_with_exception_containing_actual_response_and_its_content_in_body()
+        {
+            var exception = Assert.Throws<TestableHttpResponseException>(() => _client.LastResponse.ProcessInResponseContext(r => r.ToJson().name));
+            StepExecution.Current.Comment(exception.Message);
+            Assert.NotNull(exception.ActualResponse);
+            Assert.Contains(exception.ActualResponse.Content, exception.Message);
         }
     }
 }

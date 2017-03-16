@@ -52,5 +52,18 @@ I want an define api tests easily")]
                 _ => Then_attempt_to_use_LastResponse_properties_should_end_with_InvalidOperationException()
                 );
         }
+
+        [Scenario]
+        public async Task Response_processing_methods_should_provide_actual_response_details_on_failure()
+        {
+            await Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+                _ => Given_test_http_client(),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_with_json_content(HttpMethod.Get, "/customers/123", HttpStatusCode.NotFound, new { Error = "No such user" }),
+                _ => When_client_sends_METHOD_URL_request(HttpMethod.Get, "/customers/123"),
+                _ => Then_attempt_to_validate_successful_response_code_should_end_with_exception_containing_actual_response_and_its_content_in_body(),
+                _ => Then_attempt_to_process_expected_successful_body_should_end_with_exception_containing_actual_response_and_its_content_in_body()
+                );
+        }
     }
 }

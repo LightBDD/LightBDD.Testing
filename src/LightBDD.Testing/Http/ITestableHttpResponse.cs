@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 
 namespace LightBDD.Testing.Http
 {
-    public interface ITestableHttpResponseMessage
+    public interface ITestableHttpResponse
     {
         string Content { get; }
         HttpResponseHeaders Headers { get; }
