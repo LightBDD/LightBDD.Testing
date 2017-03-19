@@ -89,6 +89,7 @@ namespace LightBDD.Testing.Tests.Acceptance
             StepExecution.Current.Comment(exception.Message);
             Assert.NotNull(exception.ActualResponse);
             Assert.Contains(exception.ActualResponse.Content, exception.Message);
+            Assert.Contains(exception.ResponseLogFile.FullName, exception.Message);
         }
 
         private void Then_attempt_to_process_expected_successful_body_should_end_with_exception_containing_actual_response_and_its_content_in_body()
@@ -97,6 +98,34 @@ namespace LightBDD.Testing.Tests.Acceptance
             StepExecution.Current.Comment(exception.Message);
             Assert.NotNull(exception.ActualResponse);
             Assert.Contains(exception.ActualResponse.Content, exception.Message);
+        }
+
+        private void Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_of_times(HttpMethod method, string url, HttpStatusCode code, int number)
+        {
+            _server.Reconfigure(false,
+                cfg => cfg.ForRequest(method, url).RespondStatusCode(code).ExpireAfterCallNumber(number).Apply());
+        }
+
+        private async void When_client_uses_GetUntilAsync_for_URL_expecting_to_receive_status_code(string url, HttpStatusCode code)
+        {
+            await _client.GetUntilAsync(url, rsp => rsp.StatusCode == code, "Expected successful response");
+        }
+
+        private async void Then_attempt_to_call_GetUntilAsync_for_URL_expecting_to_receive_status_code_should_end_with_response_exception_containing_last_value(string url, HttpStatusCode code)
+        {
+            _client.Repeater.SetTimeout(TimeSpan.FromSeconds(1));
+
+            var timeoutMessage = "Expected successful code";
+            var ex = await Assert.ThrowsAsync<TestableHttpResponseException>(() => _client.GetUntilAsync(url, rsp => rsp.StatusCode == code, timeoutMessage));
+            Assert.Contains(timeoutMessage, ex.Message);
+            Assert.Contains(ex.ResponseLogFile.FullName, ex.Message);
+            Assert.Contains(ex.ActualResponse.Content, ex.Message);
+        }
+
+        private void Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod method, string url, HttpStatusCode code)
+        {
+            _server.Reconfigure(false,
+                cfg => cfg.ForRequest(method, url).RespondStatusCode(code).Apply());
         }
     }
 }

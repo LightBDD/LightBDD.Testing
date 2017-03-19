@@ -65,5 +65,31 @@ I want an define api tests easily")]
                 _ => Then_attempt_to_process_expected_successful_body_should_end_with_exception_containing_actual_response_and_its_content_in_body()
                 );
         }
+
+        [Scenario]
+        public async Task GetUntilAsync_should_repeat_query_until_specific_condition_is_fulfilled()
+        {
+            await Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+                _ => Given_test_http_client(),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_with_json_content(HttpMethod.Get, "/customers/345", HttpStatusCode.OK, new { name = "Kate", id = "345" }),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_of_times(HttpMethod.Get, "/customers/345", HttpStatusCode.NotFound, 3),
+
+                _ => When_client_uses_GetUntilAsync_for_URL_expecting_to_receive_status_code("/customers/345", HttpStatusCode.OK),
+                _ => Then_response_should_contain_status_code_and_json_content(HttpStatusCode.OK, new { name = "Kate", id = "345" })
+                );
+        }
+
+        [Scenario]
+        public async Task GetUntilAsync_should_repeat_query_but_fail_with_timeout_when_specific_condition_is_not_fulfilled()
+        {
+            await Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+                _ => Given_test_http_client(),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod.Get, "/customers/346", HttpStatusCode.NotFound),
+
+                _ => Then_attempt_to_call_GetUntilAsync_for_URL_expecting_to_receive_status_code_should_end_with_response_exception_containing_last_value("/customers/346", HttpStatusCode.OK)
+                );
+        }
     }
 }

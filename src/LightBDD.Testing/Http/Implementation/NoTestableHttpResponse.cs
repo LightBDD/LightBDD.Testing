@@ -17,5 +17,10 @@ namespace LightBDD.Testing.Http.Implementation
         {
             throw new InvalidOperationException("No response has been received so far.");
         }
+
+        public override string ToString()
+        {
+            return "[no response]";
+        }
     }
 }

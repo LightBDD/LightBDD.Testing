@@ -24,5 +24,6 @@ namespace LightBDD.Testing.Http
         public Encoding ContentEncoding => _request.ContentEncoding;
         public string ContentType => _request.ContentType;
         public HttpMethod Method => new HttpMethod(_request.HttpMethod);
+        public long ContentLength => _request.ContentLength64;
     }
 }

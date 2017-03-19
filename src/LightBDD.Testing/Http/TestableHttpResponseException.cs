@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 
 namespace LightBDD.Testing.Http
@@ -6,20 +7,34 @@ namespace LightBDD.Testing.Http
     public class TestableHttpResponseException : InvalidOperationException
     {
         public ITestableHttpResponse ActualResponse { get; }
+        public FileInfo ResponseLogFile { get; }
 
         public TestableHttpResponseException(string message, ITestableHttpResponse actualResponse, Exception inner = null)
-            : base(FormatMessage(message, actualResponse), inner)
+            : this(FormatMessage(message, actualResponse), actualResponse, inner) { }
+
+        private TestableHttpResponseException(Tuple<string, FileInfo> formattedMessage, ITestableHttpResponse actualResponse, Exception inner)
+            : base(formattedMessage.Item1, inner)
         {
             ActualResponse = actualResponse;
+            ResponseLogFile = formattedMessage.Item2;
         }
 
-        private static string FormatMessage(string message, ITestableHttpResponse actualResponse)
+        private static Tuple<string, FileInfo> FormatMessage(string message, ITestableHttpResponse actualResponse)
         {
             if (!actualResponse.IsValidResponse())
-                return $"{message}\n\nActual response object is invalid (no response received so far)";
+                return Tuple.Create($"{message}\n\nActual response object is invalid (no response received so far)", (FileInfo)null);
 
             var request = actualResponse.OriginalResponse.RequestMessage;
-            return $"{message}\n\nActual response for {request.Method} {request.RequestUri}: {actualResponse.StatusCode}\nContent({actualResponse.Content.Length}): {actualResponse.Content}";
+            var logFile = actualResponse.LogResponseOnDisk();
+            return Tuple.Create($"{message}\n\nActual response for {request.Method} {request.RequestUri}:\n{CreateTrimmedDump(actualResponse, 2048)}\nFull response log: {logFile.FullName}", logFile);
+        }
+
+        private static string CreateTrimmedDump(ITestableHttpResponse actualResponse, int maxLength)
+        {
+            var dump = actualResponse.DumpToString();
+            if (dump.Length > maxLength)
+                dump = dump.Substring(0, maxLength) + "...";
+            return dump;
         }
     }
 }

@@ -1,6 +1,9 @@
 using System;
 using System.Dynamic;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using LightBDD.Framework;
 using LightBDD.Framework.Commenting;
@@ -16,9 +19,21 @@ namespace LightBDD.Testing.Http
         public static T ToAnonymousJson<T>(this ITestableHttpResponse response, T expectedModel, JsonSerializerSettings settings = null) => JsonConvert.DeserializeAnonymousType(response.Content, expectedModel, settings);
         public static ITestableHttpResponse PrintResponseInComments(this ITestableHttpResponse response)
         {
-            var comment = $"Response for: {response.OriginalResponse.RequestMessage.Method} {response.OriginalResponse.RequestMessage.RequestUri}: {response.StatusCode}\n{response.Content}";
+            var comment = $"Response for: {response.OriginalResponse.RequestMessage.Method} {response.OriginalResponse.RequestMessage.RequestUri}:\n{response.DumpToString()}";
             StepExecution.Current.Comment(comment);
             return response;
+        }
+
+        public static string DumpToString(this ITestableHttpResponse response)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"StatusCode: HTTP {(int)response.StatusCode} {response.StatusCode}");
+            builder.AppendLine("Headers:");
+            foreach (var header in response.Headers)
+                builder.AppendLine($"- {header.Key}: {header.Value.FirstOrDefault()}");
+            builder.AppendLine("Content:");
+            builder.AppendLine(response.Content);
+            return builder.ToString();
         }
 
         public static ITestableHttpResponse EnsureSuccessStatusCode(this ITestableHttpResponse response)
@@ -75,6 +90,11 @@ namespace LightBDD.Testing.Http
         public static bool IsValidResponse(this ITestableHttpResponse response)
         {
             return response != null && !(response is NoTestableHttpResponse);
+        }
+
+        public static FileInfo LogResponseOnDisk(this ITestableHttpResponse response)
+        {
+            return TestableHttpResponseLogger.LogResponse(response);
         }
     }
 }

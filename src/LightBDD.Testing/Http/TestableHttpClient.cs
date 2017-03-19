@@ -11,6 +11,7 @@ namespace LightBDD.Testing.Http
     public class TestableHttpClient : IDisposable
     {
         private readonly HttpClient _client = new HttpClient();
+        public Repeat Repeater { get; private set; } = new Repeat();
 
         public TestableHttpClient(Uri baseUri)
         {
@@ -27,20 +28,36 @@ namespace LightBDD.Testing.Http
         {
             return LastResponse = await TestableHttpResponses.FromResponseAsync(await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead));
         }
-        public Task<ITestableHttpResponse> GetAsync(string uri)
-            => SendAsync(HttpMethod.Get, uri);
 
-        public Task<ITestableHttpResponse> SendAsync(HttpMethod method, string uri)
-            => SendAsync(new HttpRequestMessage { Method = method, RequestUri = new Uri(uri, UriKind.RelativeOrAbsolute) });
+        public async Task<ITestableHttpResponse> GetAsync(string uri)
+            => await SendAsync(HttpMethod.Get, uri);
 
-        public Task<ITestableHttpResponse> SendStringAsync(HttpMethod method, string uri, string content, Encoding encoding, string mediaType)
-            => SendAsync(new HttpRequestMessage { Method = method, RequestUri = new Uri(uri, UriKind.RelativeOrAbsolute), Content = new StringContent(content, encoding, mediaType) });
+        public async Task<ITestableHttpResponse> GetUntilAsync(string uri, Func<ITestableHttpResponse, bool> successCondition, string timeoutMessage)
+            => await SendUntilAsync(() => new HttpRequestMessage(HttpMethod.Get, uri), successCondition, timeoutMessage);
 
-        public Task<ITestableHttpResponse> SendJsonStringAsync(HttpMethod method, string uri, string content)
-            => SendStringAsync(method, uri, content, Encoding.UTF8, "application/json");
+        public async Task<ITestableHttpResponse> SendUntilAsync(Func<HttpRequestMessage> requestCreator, Func<ITestableHttpResponse, bool> successCondition, string timeoutMessage)
+        {
+            try
+            {
+                return await Repeater.RepeatUntilAsync(() => SendAsync(requestCreator()), successCondition, timeoutMessage);
+            }
+            catch (RepeatTimeoutException<ITestableHttpResponse> exception)
+            {
+                throw new TestableHttpResponseException(exception.Message, exception.LastValue, exception);
+            }
+        }
 
-        public Task<ITestableHttpResponse> SendJsonAsync(HttpMethod method, string uri, object content, JsonSerializerSettings settings = null)
-            => SendJsonStringAsync(method, uri, JsonConvert.SerializeObject(content, settings));
+        public async Task<ITestableHttpResponse> SendAsync(HttpMethod method, string uri)
+            => await SendAsync(new HttpRequestMessage(method, uri));
+
+        public async Task<ITestableHttpResponse> SendStringAsync(HttpMethod method, string uri, string content, Encoding encoding, string mediaType)
+            => await SendAsync(new HttpRequestMessage(method, uri).WithStringContent(content, encoding, mediaType));
+
+        public async Task<ITestableHttpResponse> SendJsonStringAsync(HttpMethod method, string uri, string content)
+            => await SendAsync(new HttpRequestMessage(method, uri).WithJsonStringContent(content));
+
+        public async Task<ITestableHttpResponse> SendJsonAsync(HttpMethod method, string uri, object content, JsonSerializerSettings settings = null)
+            => await SendAsync(new HttpRequestMessage(method, uri).WithJsonContent(content, settings));
 
         public void Dispose()
         {

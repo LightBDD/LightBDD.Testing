@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -46,6 +49,13 @@ namespace LightBDD.Testing.Http
             return _content != null
                 ? _response.OutputStream.WriteAsync(_content, 0, _content.Length)
                 : Task.CompletedTask;
+        }
+
+        public MockHttpResponse SetHeaders(IEnumerable<KeyValuePair<string, string>> responseHeaders)
+        {
+            foreach (var responseHeader in responseHeaders)
+                _response.Headers.Set(responseHeader.Key, responseHeader.Value);
+            return this;
         }
     }
 }

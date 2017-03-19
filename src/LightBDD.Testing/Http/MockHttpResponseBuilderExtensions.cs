@@ -13,6 +13,16 @@ namespace LightBDD.Testing.Http
             return builder.Respond((req, rsp) => { respond(req, rsp); return Task.CompletedTask; });
         }
 
+        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Action<MockHttpResponse> respond)
+        {
+            return builder.Respond((req, rsp) => { respond(rsp); return Task.CompletedTask; });
+        }
+
+        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Func<MockHttpResponse,Task> respond)
+        {
+            return builder.Respond((req, rsp) => respond(rsp));
+        }
+
         public static IMockHttpHandlerConfigurator RespondStatusCode(this IMockHttpResponseBuilder builder, HttpStatusCode code)
         {
             return builder.Respond((req, rsp) => rsp.SetStatusCode(code));

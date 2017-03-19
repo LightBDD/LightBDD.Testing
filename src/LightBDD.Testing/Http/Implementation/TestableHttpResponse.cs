@@ -17,5 +17,10 @@ namespace LightBDD.Testing.Http.Implementation
         public string ReasonPhrase => OriginalResponse.ReasonPhrase;
         public HttpStatusCode StatusCode => OriginalResponse.StatusCode;
         public HttpResponseMessage OriginalResponse { get; }
+
+        public override string ToString()
+        {
+            return $"[StatusCode: {StatusCode}, ContentLength: {OriginalResponse.Content.Headers.ContentLength}]";
+        }
     }
 }
