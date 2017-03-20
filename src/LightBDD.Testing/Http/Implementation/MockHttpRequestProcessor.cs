@@ -6,16 +6,16 @@ namespace LightBDD.Testing.Http.Implementation
 {
     internal class MockHttpRequestProcessor
     {
-        private readonly Func<MockHttpRequest, bool> _predicate;
-        private readonly Func<MockHttpRequest, MockHttpResponse, Task> _processor;
+        private readonly Func<ITestableHttpRequest, bool> _predicate;
+        private readonly Func<ITestableHttpRequest, MockHttpResponse, Task> _processor;
 
-        public MockHttpRequestProcessor(Func<MockHttpRequest, bool> predicate, Func<MockHttpRequest, MockHttpResponse, Task> processor)
+        public MockHttpRequestProcessor(Func<ITestableHttpRequest, bool> predicate, Func<ITestableHttpRequest, MockHttpResponse, Task> processor)
         {
             _predicate = predicate;
             _processor = processor;
         }
 
-        public bool Match(MockHttpRequest request)
+        public bool Match(ITestableHttpRequest request)
         {
             try
             {
@@ -28,6 +28,6 @@ namespace LightBDD.Testing.Http.Implementation
             }
         }
 
-        public Task ProcessRequestAsync(MockHttpRequest request, MockHttpResponse response) => _processor(request, response);
+        public Task ProcessRequestAsync(ITestableHttpRequest request, MockHttpResponse response) => _processor(request, response);
     }
 }

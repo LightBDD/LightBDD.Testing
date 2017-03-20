@@ -2,25 +2,26 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using LightBDD.Testing.Http.Implementation;
 using Newtonsoft.Json;
 
 namespace LightBDD.Testing.Http
 {
     public static class MockHttpResponseBuilderExtensions
     {
-        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Action<MockHttpRequest, MockHttpResponse> respond)
+        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Action<ITestableHttpRequest, IMockHttpResponse> respond)
         {
-            return builder.Respond((req, rsp) => { respond(req, rsp); return Task.CompletedTask; });
+            return builder.RespondAsync((req, rsp) => { respond(req, rsp); return Task.CompletedTask; });
         }
 
-        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Action<MockHttpResponse> respond)
+        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Action<IMockHttpResponse> respond)
         {
-            return builder.Respond((req, rsp) => { respond(rsp); return Task.CompletedTask; });
+            return builder.RespondAsync((req, rsp) => { respond(rsp); return Task.CompletedTask; });
         }
 
-        public static IMockHttpHandlerConfigurator Respond(this IMockHttpResponseBuilder builder, Func<MockHttpResponse,Task> respond)
+        public static IMockHttpHandlerConfigurator RespondAsync(this IMockHttpResponseBuilder builder, Func<IMockHttpResponse, Task> respond)
         {
-            return builder.Respond((req, rsp) => respond(rsp));
+            return builder.RespondAsync((req, rsp) => respond(rsp));
         }
 
         public static IMockHttpHandlerConfigurator RespondStatusCode(this IMockHttpResponseBuilder builder, HttpStatusCode code)

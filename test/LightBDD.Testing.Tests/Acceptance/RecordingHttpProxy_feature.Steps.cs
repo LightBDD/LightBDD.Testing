@@ -28,7 +28,7 @@ namespace LightBDD.Testing.Tests.Acceptance
 
         private void Given_recording_proxy_for_target_server()
         {
-            _proxy = new RecordingHttpProxy(MockHttpServerHelper.GetNextPort(), _server.BaseAddress, false);
+            _proxy = new RecordingHttpProxy(MockHttpServerHelper.GetNextPort(), _server.BaseAddress, RecordingHttpProxy.Mode.Record);
         }
 
         private void Given_test_http_client_pointing_to_the_proxy()
@@ -44,7 +44,7 @@ namespace LightBDD.Testing.Tests.Acceptance
             _server.Reconfigure(false, cfg =>
                 cfg.ForRequest(req =>
                         req.Method == method && req.RelativeUri == url &&
-                        requestHeaders.All(h => req.Headers.Get(h.Key) == h.Value) &&
+                        requestHeaders.All(h => req.Headers.ContainsKey(h.Key) && req.Headers[h.Key] == h.Value) &&
                         Equals(req.GetContentAsAnonymousJson(requestContent), requestContent))
                     .Respond(rsp => rsp.SetStatusCode(code).SetHeaders(responseHeaders).SetJsonContent(responseContent))
                     .Apply());
@@ -61,7 +61,7 @@ namespace LightBDD.Testing.Tests.Acceptance
             Assert.Equal(code, _client.LastResponse.StatusCode);
             Assert.Equal(content, _client.LastResponse.ToAnonymousJson(content));
             foreach (var header in headers)
-                Assert.Equal(header.Value, _client.LastResponse.Headers.GetValues(header.Key).SingleOrDefault());
+                Assert.Equal(header.Value, _client.LastResponse.Headers[header.Key]);
         }
     }
 }

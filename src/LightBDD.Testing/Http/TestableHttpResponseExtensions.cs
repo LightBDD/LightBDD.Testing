@@ -14,12 +14,13 @@ namespace LightBDD.Testing.Http
 {
     public static class TestableHttpResponseExtensions
     {
-        public static T ToJson<T>(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => JsonConvert.DeserializeObject<T>(response.Content, settings);
-        public static dynamic ToJson(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => JsonConvert.DeserializeObject<ExpandoObject>(response.Content, settings);
-        public static T ToAnonymousJson<T>(this ITestableHttpResponse response, T expectedModel, JsonSerializerSettings settings = null) => JsonConvert.DeserializeAnonymousType(response.Content, expectedModel, settings);
+        public static T ToJson<T>(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => JsonConvert.DeserializeObject<T>(response.ToStringContent(), settings);
+        public static string ToStringContent(this ITestableHttpResponse response) => response.Content.ContentEncoding.GetString(response.Content.Content);
+        public static dynamic ToJson(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => JsonConvert.DeserializeObject<ExpandoObject>(response.ToStringContent(), settings);
+        public static T ToAnonymousJson<T>(this ITestableHttpResponse response, T expectedModel, JsonSerializerSettings settings = null) => JsonConvert.DeserializeAnonymousType(response.ToStringContent(), expectedModel, settings);
         public static ITestableHttpResponse PrintResponseInComments(this ITestableHttpResponse response)
         {
-            var comment = $"Response for: {response.OriginalResponse.RequestMessage.Method} {response.OriginalResponse.RequestMessage.RequestUri}:\n{response.DumpToString()}";
+            var comment = $"Response for: {response.Request.Method} {response.Request.Uri}:\n{response.DumpToString()}";
             StepExecution.Current.Comment(comment);
             return response;
         }
@@ -32,7 +33,7 @@ namespace LightBDD.Testing.Http
             foreach (var header in response.Headers)
                 builder.AppendLine($"- {header.Key}: {header.Value.FirstOrDefault()}");
             builder.AppendLine("Content:");
-            builder.AppendLine(response.Content);
+            builder.AppendLine(response.ToStringContent());
             return builder.ToString();
         }
 

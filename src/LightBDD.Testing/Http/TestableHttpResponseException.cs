@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 
 namespace LightBDD.Testing.Http
 {
@@ -24,9 +23,9 @@ namespace LightBDD.Testing.Http
             if (!actualResponse.IsValidResponse())
                 return Tuple.Create($"{message}\n\nActual response object is invalid (no response received so far)", (FileInfo)null);
 
-            var request = actualResponse.OriginalResponse.RequestMessage;
+            var request = actualResponse.Request;
             var logFile = actualResponse.LogResponseOnDisk();
-            return Tuple.Create($"{message}\n\nActual response for {request.Method} {request.RequestUri}:\n{CreateTrimmedDump(actualResponse, 2048)}\nFull response log: {logFile.FullName}", logFile);
+            return Tuple.Create($"{message}\n\nActual response for {request.Method} {request.Uri}:\n{CreateTrimmedDump(actualResponse, 2048)}\nFull response log: {logFile.FullName}", logFile);
         }
 
         private static string CreateTrimmedDump(ITestableHttpResponse actualResponse, int maxLength)

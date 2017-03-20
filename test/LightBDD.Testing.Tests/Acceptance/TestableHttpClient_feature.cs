@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using LightBDD.Framework;
 using LightBDD.Framework.Scenarios.Extended;
 using LightBDD.XUnit2;
-using Xunit;
 
 [assembly: LightBddScope]
 

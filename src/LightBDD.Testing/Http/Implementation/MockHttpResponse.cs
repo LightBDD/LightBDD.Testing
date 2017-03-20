@@ -1,14 +1,12 @@
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace LightBDD.Testing.Http
+namespace LightBDD.Testing.Http.Implementation
 {
-    public class MockHttpResponse
+    internal class MockHttpResponse : IMockHttpResponse
     {
         private readonly HttpListenerResponse _response;
         private byte[] _content;
@@ -18,13 +16,13 @@ namespace LightBDD.Testing.Http
             _response = response;
         }
 
-        public MockHttpResponse SetStatusCode(HttpStatusCode statusCode)
+        public IMockHttpResponse SetStatusCode(HttpStatusCode statusCode)
         {
             _response.StatusCode = (int)statusCode;
             return this;
         }
 
-        public MockHttpResponse SetContent(byte[] content, Encoding encoding, string contentType)
+        public IMockHttpResponse SetContent(byte[] content, Encoding encoding, string contentType)
         {
             _response.ContentLength64 = content.Length;
             _response.ContentEncoding = encoding;
@@ -33,10 +31,10 @@ namespace LightBDD.Testing.Http
             return this;
         }
 
-        public MockHttpResponse SetStringContent(string content, Encoding encoding, string contentType)
+        public IMockHttpResponse SetStringContent(string content, Encoding encoding, string contentType)
             => SetContent(encoding.GetBytes(content), encoding, contentType);
 
-        public MockHttpResponse SetJsonContent(object content, JsonSerializerSettings settings = null)
+        public IMockHttpResponse SetJsonContent(object content, JsonSerializerSettings settings = null)
             => SetStringContent(JsonConvert.SerializeObject(content, settings), Encoding.UTF8, "application/json");
 
         internal void Close()
@@ -51,7 +49,7 @@ namespace LightBDD.Testing.Http
                 : Task.CompletedTask;
         }
 
-        public MockHttpResponse SetHeaders(IEnumerable<KeyValuePair<string, string>> responseHeaders)
+        public IMockHttpResponse SetHeaders(IEnumerable<KeyValuePair<string, string>> responseHeaders)
         {
             foreach (var responseHeader in responseHeaders)
                 _response.Headers.Set(responseHeader.Key, responseHeader.Value);

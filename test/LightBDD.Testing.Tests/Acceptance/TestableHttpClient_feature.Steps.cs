@@ -4,7 +4,6 @@ using System.Net.Http;
 using LightBDD.Framework;
 using LightBDD.Framework.Commenting;
 using LightBDD.Testing.Http;
-using LightBDD.Testing.Http.Implementation;
 using LightBDD.Testing.Tests.Helpers;
 using LightBDD.XUnit2;
 using Xunit;
@@ -50,7 +49,7 @@ namespace LightBDD.Testing.Tests.Acceptance
         {
             Assert.Throws<InvalidOperationException>(() => _client.LastResponse.Content);
             Assert.Throws<InvalidOperationException>(() => _client.LastResponse.Headers);
-            Assert.Throws<InvalidOperationException>(() => _client.LastResponse.OriginalResponse);
+            Assert.Throws<InvalidOperationException>(() => _client.LastResponse.Request);
             Assert.Throws<InvalidOperationException>(() => _client.LastResponse.ReasonPhrase);
             Assert.Throws<InvalidOperationException>(() => _client.LastResponse.StatusCode);
         }
@@ -88,7 +87,7 @@ namespace LightBDD.Testing.Tests.Acceptance
             var exception = Assert.Throws<TestableHttpResponseException>(() => _client.LastResponse.EnsureSuccessStatusCode());
             StepExecution.Current.Comment(exception.Message);
             Assert.NotNull(exception.ActualResponse);
-            Assert.Contains(exception.ActualResponse.Content, exception.Message);
+            Assert.Contains(exception.ActualResponse.ToStringContent(), exception.Message);
             Assert.Contains(exception.ResponseLogFile.FullName, exception.Message);
         }
 
@@ -97,7 +96,7 @@ namespace LightBDD.Testing.Tests.Acceptance
             var exception = Assert.Throws<TestableHttpResponseException>(() => _client.LastResponse.ProcessInResponseContext(r => r.ToJson().name));
             StepExecution.Current.Comment(exception.Message);
             Assert.NotNull(exception.ActualResponse);
-            Assert.Contains(exception.ActualResponse.Content, exception.Message);
+            Assert.Contains(exception.ActualResponse.ToStringContent(), exception.Message);
         }
 
         private void Given_server_configured_for_METHOD_URL_to_return_status_code_for_next_NUMBER_of_times(HttpMethod method, string url, HttpStatusCode code, int number)
@@ -119,7 +118,7 @@ namespace LightBDD.Testing.Tests.Acceptance
             var ex = await Assert.ThrowsAsync<TestableHttpResponseException>(() => _client.GetUntilAsync(url, rsp => rsp.StatusCode == code, timeoutMessage));
             Assert.Contains(timeoutMessage, ex.Message);
             Assert.Contains(ex.ResponseLogFile.FullName, ex.Message);
-            Assert.Contains(ex.ActualResponse.Content, ex.Message);
+            Assert.Contains(ex.ActualResponse.ToStringContent(), ex.Message);
         }
 
         private void Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod method, string url, HttpStatusCode code)

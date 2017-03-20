@@ -1,10 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using LightBDD.Testing.Http.Implementation;
 
 namespace LightBDD.Testing.Http
 {
     public interface IMockHttpResponseBuilder
     {
-        IMockHttpHandlerConfigurator Respond(Func<MockHttpRequest, MockHttpResponse, Task> response);
+        IMockHttpHandlerConfigurator RespondAsync(Func<ITestableHttpRequest, IMockHttpResponse, Task> response);
     }
 }

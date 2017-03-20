@@ -1,26 +1,31 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 
 namespace LightBDD.Testing.Http.Implementation
 {
     internal class TestableHttpResponse : ITestableHttpResponse
     {
-        public TestableHttpResponse(HttpResponseMessage response, string content)
+        public TestableHttpResponse(HttpResponseMessage response, byte[] content, ITestableHttpRequest request)
         {
-            OriginalResponse = response;
-            Content = content;
+            Content = new MockHttpContent(response.Content, content);
+            Request = request;
+            ReasonPhrase = response.ReasonPhrase;
+            Headers = response.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault());
+            StatusCode = response.StatusCode;
         }
 
-        public string Content { get; }
-        public HttpResponseHeaders Headers => OriginalResponse.Headers;
-        public string ReasonPhrase => OriginalResponse.ReasonPhrase;
-        public HttpStatusCode StatusCode => OriginalResponse.StatusCode;
-        public HttpResponseMessage OriginalResponse { get; }
+        public string ReasonPhrase { get; }
+        public HttpStatusCode StatusCode { get; }
 
         public override string ToString()
         {
-            return $"[StatusCode: {StatusCode}, ContentLength: {OriginalResponse.Content.Headers.ContentLength}]";
+            return $"[StatusCode: {StatusCode}, ContentLength: {Content.ContentLength}]";
         }
+
+        public ITestableHttpContent Content { get; }
+        public ITestableHttpRequest Request { get; }
+        public IReadOnlyDictionary<string, string> Headers { get; }
     }
 }

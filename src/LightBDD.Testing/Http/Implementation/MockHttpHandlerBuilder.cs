@@ -7,16 +7,16 @@ namespace LightBDD.Testing.Http.Implementation
     internal class MockHttpHandlerBuilder : IMockHttpResponseBuilder, IMockHttpHandlerConfigurator
     {
         private readonly MockHttpServerConfigurator _configurator;
-        private Func<MockHttpRequest, bool> _predicate;
-        private Func<MockHttpRequest, MockHttpResponse, Task> _response;
+        private Func<ITestableHttpRequest, bool> _predicate;
+        private Func<ITestableHttpRequest, MockHttpResponse, Task> _response;
 
-        public MockHttpHandlerBuilder(MockHttpServerConfigurator configurator, Func<MockHttpRequest, bool> predicate)
+        public MockHttpHandlerBuilder(MockHttpServerConfigurator configurator, Func<ITestableHttpRequest, bool> predicate)
         {
             _configurator = configurator;
             _predicate = predicate;
         }
 
-        public IMockHttpHandlerConfigurator Respond(Func<MockHttpRequest, MockHttpResponse, Task> response)
+        public IMockHttpHandlerConfigurator RespondAsync(Func<ITestableHttpRequest, IMockHttpResponse, Task> response)
         {
             _response = response;
             return this;

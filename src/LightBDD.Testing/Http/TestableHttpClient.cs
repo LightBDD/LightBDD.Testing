@@ -26,7 +26,9 @@ namespace LightBDD.Testing.Http
 
         public async Task<ITestableHttpResponse> SendAsync(HttpRequestMessage request)
         {
-            return LastResponse = await TestableHttpResponses.FromResponseAsync(await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead));
+            var testableHttpRequest = new MockHttpRequest(request, request.Content != null ? await request.Content.ReadAsByteArrayAsync() : null, _client.BaseAddress);
+            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+            return LastResponse = new TestableHttpResponse(response, await response.Content.ReadAsByteArrayAsync(), testableHttpRequest);
         }
 
         public async Task<ITestableHttpResponse> GetAsync(string uri)

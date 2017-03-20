@@ -16,12 +16,12 @@ namespace LightBDD.Testing.Http
         public IMockHttpResponseBuilder ForRequest(HttpMethod method, Func<string, bool> relativeUriMatch)
             => ForRequest(r => r.Method.Equals(method) && relativeUriMatch(r.RelativeUri));
 
-        public IMockHttpResponseBuilder ForRequest(Func<MockHttpRequest, bool> predicate)
+        public IMockHttpResponseBuilder ForRequest(Func<ITestableHttpRequest, bool> predicate)
         {
             return new MockHttpHandlerBuilder(this, predicate);
         }
 
-        internal MockHttpServerConfigurator Add(Func<MockHttpRequest, bool> predicate, Func<MockHttpRequest, MockHttpResponse, Task> response)
+        internal MockHttpServerConfigurator Add(Func<ITestableHttpRequest, bool> predicate, Func<ITestableHttpRequest, MockHttpResponse, Task> response)
         {
             _processors.Add(new MockHttpRequestProcessor(predicate, response));
             return this;
