@@ -16,6 +16,7 @@ namespace LightBDD.Testing.Tests.Acceptance
         private MockHttpServer _server;
         private RecordingHttpProxy _proxy;
         private TestableHttpClient _client;
+        private readonly RecordedHttpCallRepository _repository = new RecordedHttpCallRepository();
 
         public RecordingHttpProxy_feature(ITestOutputHelper output) : base(output)
         {
@@ -28,7 +29,7 @@ namespace LightBDD.Testing.Tests.Acceptance
 
         private void Given_recording_proxy_for_target_server()
         {
-            _proxy = new RecordingHttpProxy(MockHttpServerHelper.GetNextPort(), _server.BaseAddress, RecordingHttpProxy.Mode.Record);
+            _proxy = new RecordingHttpProxy(MockHttpServerHelper.GetNextPort(), _server.BaseAddress, RecordingHttpProxy.Mode.Record, _repository);
         }
 
         private void Given_test_http_client_pointing_to_the_proxy()
@@ -49,6 +50,10 @@ namespace LightBDD.Testing.Tests.Acceptance
                     .Respond(rsp => rsp.SetStatusCode(code).SetHeaders(responseHeaders).SetJsonContent(responseContent))
                     .Apply());
         }
+        private void Given_server_configured_for_METHOD_URL_to_return_status_code(HttpMethod method, string url, HttpStatusCode code)
+        {
+            _server.Reconfigure(false, cfg => cfg.ForRequest(method, url).RespondStatusCode(code).Apply());
+        }
 
         private async void When_client_sends_METHOD_URL_request_with_headers_and_json_content(HttpMethod method, string url, [FormatCollection]Dictionary<string, string> headers, object content)
         {
@@ -62,6 +67,12 @@ namespace LightBDD.Testing.Tests.Acceptance
             Assert.Equal(content, _client.LastResponse.ToAnonymousJson(content));
             foreach (var header in headers)
                 Assert.Equal(header.Value, _client.LastResponse.Headers[header.Key]);
+        }
+
+        private void Given_proxy_mode_is_changed_to_replay()
+        {
+            _proxy.Dispose();
+            _proxy = new RecordingHttpProxy(_proxy.BaseAddress.Port, _server.BaseAddress, RecordingHttpProxy.Mode.Replay, _repository);
         }
     }
 }

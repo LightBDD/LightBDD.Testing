@@ -8,11 +8,11 @@ namespace LightBDD.Testing.Http
         None = 0,
         Content = 1,
         Headers = 2,
-        Url = 4,
+        Uri = 4,
         ContentAndHeaders = Content | Headers,
-        ContentAndUrl = Content | Url,
-        HeadersAndUrl = Headers | Url,
-        All = Headers | Url | Content
+        ContentAndUri = Content | Uri,
+        HeadersAndUri = Headers | Uri,
+        All = Headers | Uri | Content
     }
 
     public interface IRecordedHttpCallExpectationBuilder
@@ -20,5 +20,6 @@ namespace LightBDD.Testing.Http
         IRecordedHttpCallExpectationBuilder ForRequest(Func<ITestableHttpRequest, bool> requestPredicate);
         IRecordedHttpCallExpectationBuilder ExpectResponse(Func<ITestableHttpResponse, bool> responsePredicate);
         IRecordedHttpCallExpectationBuilder WithReplacement(string regex, string replacement, ReplacementOptions options = ReplacementOptions.All);
+        IRecordedHttpCallExpectationBuilder WithRequestMatch(Func<ITestableHttpRequest, ITestableHttpRequest, bool> requestMatch);
     }
 }

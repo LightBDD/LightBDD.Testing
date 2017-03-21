@@ -25,10 +25,12 @@ namespace LightBDD.Testing.Http
 
         private readonly MockHttpServer _server;
         private readonly ConcurrentStack<RecordedHttpCallExpectation> _expectations = new ConcurrentStack<RecordedHttpCallExpectation>();
+        private readonly RecordedHttpCallRepository _repository;
 
-        public RecordingHttpProxy(int proxyPort, Uri targetUrl, Mode mode)
+        public RecordingHttpProxy(int proxyPort, Uri targetUrl, Mode mode, RecordedHttpCallRepository repository)
         {
             _mode = mode;
+            _repository = repository;
             Proxy = new HttpClient { BaseAddress = targetUrl };
             _server = MockHttpServer.Start(proxyPort, cfg => ConfigureServer(cfg, mode));
         }
@@ -37,6 +39,15 @@ namespace LightBDD.Testing.Http
         {
             if (mode != Mode.Replay)
                 return cfg.ForRequest(r => true).RespondAsync(ProxyAndRecordAsync).Apply();
+
+            DefineExpectation(b => b
+                .ForRequest(r => true)
+                .ExpectResponse(r => true)
+                .WithRequestMatch((req, rec) =>
+                    string.Equals(req.RelativeUri, rec.RelativeUri, StringComparison.OrdinalIgnoreCase)
+                    && req.Method == rec.Method
+                    && req.Headers.All(h => rec.Headers.ContainsKey(h.Key) && h.Value == rec.Headers[h.Key])
+                    && req.GetContentAsString() == rec.GetContentAsString()));
 
             return cfg.ForRequest(r => true)
                 .Respond(ReplayResponse)
@@ -47,7 +58,7 @@ namespace LightBDD.Testing.Http
         {
             var expectation = _expectations.FirstOrDefault(e => e.Match(request));
             if (expectation != null)
-                expectation.Replay(request, response);
+                expectation.Replay(request, response, _repository);
             else
                 ReplayNoMapping(response);
         }
@@ -68,9 +79,14 @@ namespace LightBDD.Testing.Http
             CopyHeaders(req, request);
 
             var response = await Proxy.SendAsync(request);
+
+            var content = await response.Content.ReadAsByteArrayAsync();
+
+            _repository.Add(new TestableHttpResponse(response, content, req));
+
             rsp.SetStatusCode(response.StatusCode)
                 .SetContent(
-                    await response.Content.ReadAsByteArrayAsync(),
+                    content,
                     response.Content.Headers.ContentEncoding.Select(Encoding.GetEncoding).FirstOrDefault() ??
                     Encoding.UTF8,
                     response.Content.Headers.ContentType.MediaType)

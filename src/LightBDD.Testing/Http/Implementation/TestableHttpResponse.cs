@@ -16,6 +16,15 @@ namespace LightBDD.Testing.Http.Implementation
             StatusCode = response.StatusCode;
         }
 
+        public TestableHttpResponse(ITestableHttpRequest request, HttpStatusCode statusCode, string reasonPhrase, ITestableHttpContent content, IReadOnlyDictionary<string, string> headers)
+        {
+            Request = request;
+            StatusCode = statusCode;
+            ReasonPhrase = reasonPhrase;
+            Content = content;
+            Headers = headers;
+        }
+
         public string ReasonPhrase { get; }
         public HttpStatusCode StatusCode { get; }
 

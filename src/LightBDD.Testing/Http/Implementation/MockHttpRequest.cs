@@ -15,6 +15,7 @@ namespace LightBDD.Testing.Http.Implementation
             RelativeUri = "/" + baseAddress.MakeRelativeUri(request.Url);
             Headers = request.Headers.AllKeys.ToDictionary(key => key, key => request.Headers[key]);
             Content = new MockHttpContent(content, request.ContentEncoding, request.ContentType);
+            BaseUri = baseAddress;
         }
 
         public MockHttpRequest(HttpRequestMessage request, byte[] content, Uri baseAddress)
@@ -24,6 +25,16 @@ namespace LightBDD.Testing.Http.Implementation
             RelativeUri = request.RequestUri.ToString();
             Headers = request.Headers.ToDictionary(h => h.Key, h => h.Value.FirstOrDefault());
             Content = request.Content != null ? new MockHttpContent(request.Content, content) : null;
+            BaseUri = baseAddress;
+        }
+
+        public MockHttpRequest(Uri baseUri, HttpMethod method, string relativeUri, ITestableHttpContent content, Dictionary<string, string> headers)
+        {
+            BaseUri = baseUri;
+            Method = method;
+            RelativeUri = relativeUri;
+            Content = content;
+            Headers = headers;
         }
 
         public string RelativeUri { get; }
@@ -31,5 +42,6 @@ namespace LightBDD.Testing.Http.Implementation
         public HttpMethod Method { get; }
         public IReadOnlyDictionary<string, string> Headers { get; }
         public ITestableHttpContent Content { get; }
+        public Uri BaseUri { get; }
     }
 }
