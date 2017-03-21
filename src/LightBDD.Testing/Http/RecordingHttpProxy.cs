@@ -12,6 +12,7 @@ namespace LightBDD.Testing.Http
 {
     public class RecordingHttpProxy : IDisposable
     {
+        private static readonly string[] InvalidHeaders = new[] { "Transfer-Encoding" };
         private readonly Mode _mode;
 
         public enum Mode
@@ -58,7 +59,7 @@ namespace LightBDD.Testing.Http
         {
             var expectation = _expectations.FirstOrDefault(e => e.Match(request));
             if (expectation != null)
-                expectation.Replay(request, response, _repository);
+                Replay(response, expectation.PrepareForReplay(request, _repository));
             else
                 ReplayNoMapping(response);
         }
@@ -73,6 +74,18 @@ namespace LightBDD.Testing.Http
                     "text");
         }
 
+        private void Replay(IMockHttpResponse rsp, ITestableHttpResponse response)
+        {
+            rsp.SetStatusCode(response.StatusCode)
+               .SetHeaders(response.Headers.Where(kv => !InvalidHeaders.Contains(kv.Key)));
+
+            if (response.Content.ContentLength > 0)
+                rsp.SetContent(
+                        response.Content.Content,
+                        response.Content.ContentEncoding,
+                        response.Content.ContentType);
+        }
+
         private async Task ProxyAndRecordAsync(ITestableHttpRequest req, IMockHttpResponse rsp)
         {
             var request = new HttpRequestMessage(req.Method, req.RelativeUri) { Content = req.Content.ContentLength >= 0 ? new ByteArrayContent(req.Content.Content) : null };
@@ -82,20 +95,16 @@ namespace LightBDD.Testing.Http
 
             var content = await response.Content.ReadAsByteArrayAsync();
 
-            _repository.Add(new TestableHttpResponse(response, content, req));
-
-            rsp.SetStatusCode(response.StatusCode)
-                .SetContent(
-                    content,
-                    response.Content.Headers.ContentEncoding.Select(Encoding.GetEncoding).FirstOrDefault() ??
-                    Encoding.UTF8,
-                    response.Content.Headers.ContentType.MediaType)
-                .SetHeaders(CollectResponseHeaders(response));
+            var recorded = new TestableHttpResponse(response, content, req);
+            _repository.Add(recorded);
+            Replay(rsp, recorded);
         }
 
         private static IEnumerable<KeyValuePair<string, string>> CollectResponseHeaders(HttpResponseMessage response)
         {
-            return response.Headers.Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value.FirstOrDefault()));
+            return response.Headers
+                .Where(kv => !InvalidHeaders.Contains(kv.Key))
+                .Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value.FirstOrDefault()));
         }
 
         private static void CopyHeaders(ITestableHttpRequest from, HttpRequestMessage to)

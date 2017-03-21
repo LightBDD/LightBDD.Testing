@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using LightBDD.Testing.Http.Implementation;
 
@@ -88,9 +89,14 @@ namespace LightBDD.Testing.Http
                 await processor.ProcessRequestAsync(request, response);
                 await response.SendResponseAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                ctx.Response.ContentType = "text";
+                var buffer = Encoding.UTF8.GetBytes(e.ToString());
+                ctx.Response.ContentEncoding = Encoding.UTF8;
+                ctx.Response.ContentLength64 = buffer.Length;
+                ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
             }
             finally
             {

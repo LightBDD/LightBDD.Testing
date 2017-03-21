@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using LightBDD.Framework.Formatting;
@@ -56,15 +57,25 @@ namespace LightBDD.Testing.Tests.Acceptance
             _server.Reconfigure(false, cfg => cfg.ForRequest(method, url).RespondStatusCode(code).Apply());
         }
 
+        private void Given_server_configured_for_CRITERIA_to_return_status_code(Expression<Func<ITestableHttpRequest, bool>> criteria, HttpStatusCode code)
+        {
+            _server.Reconfigure(false, cfg => cfg.ForRequest(criteria.Compile()).RespondStatusCode(code).Apply());
+        }
+
         private async void When_client_sends_METHOD_URL_request_with_headers_and_json_content(HttpMethod method, string url, [FormatCollection]Dictionary<string, string> headers, object content)
         {
             await _client.SendAsync(new HttpRequestMessage(method, url).WithJsonContent(content).WithHeaders(headers));
         }
 
+        private void Then_response_should_contain_status_code(HttpStatusCode code)
+        {
+            _client.LastResponse.EnsureStatusCode(code);
+        }
+
         private void Then_response_should_contain_status_code_with_headers_and_json_content<T>(HttpStatusCode code, [FormatCollection]Dictionary<string, string> headers, T content)
         {
             Assert.NotNull(_client.LastResponse);
-            Assert.Equal(code, _client.LastResponse.StatusCode);
+            _client.LastResponse.EnsureStatusCode(code);
             Assert.Equal(content, _client.LastResponse.ToAnonymousJson(content));
             foreach (var header in headers)
                 Assert.Equal(header.Value, _client.LastResponse.Headers[header.Key]);
@@ -74,6 +85,20 @@ namespace LightBDD.Testing.Tests.Acceptance
         {
             _proxy.Dispose();
             _proxy = new RecordingHttpProxy(_proxy.BaseAddress.Port, _server.BaseAddress, RecordingHttpProxy.Mode.Replay, new RecordedHttpCallRepository(_recordingsRepositoryPath));
+        }
+
+        private void Given_proxy_has_expectation_for_request_REQUESTCRITERIA_to_return_response_matching_RESPONSECRITERIA(Expression<Func<ITestableHttpRequest, bool>> requestCriteria, Expression<Func<ITestableHttpResponse, bool>> responseCriteria)
+        {
+            _proxy.DefineExpectation(e => e
+                .ForRequest(requestCriteria.Compile())
+                .ExpectResponse(responseCriteria.Compile()));
+        }
+
+        private void Given_proxy_has_expectation_for_request_REQUESTCRITERIA_to_return_response_matching_RESPONSECRITERIA_with_additonal_options(Expression<Func<ITestableHttpRequest, bool>> requestCriteria, Expression<Func<ITestableHttpResponse, bool>> responseCriteria, Expression<Action<IRecordedHttpCallExpectationBuilder>> options)
+        {
+            _proxy.DefineExpectation(e => options.Compile().Invoke(e
+                .ForRequest(requestCriteria.Compile())
+                .ExpectResponse(responseCriteria.Compile())));
         }
     }
 }

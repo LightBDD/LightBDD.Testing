@@ -22,7 +22,7 @@ namespace LightBDD.Testing.Http.Implementation
 
         public bool Match(ITestableHttpRequest request) => _requestPredicate.Invoke(ApplyReplacements(request));
 
-        public void Replay(ITestableHttpRequest request, IMockHttpResponse response, RecordedHttpCallRepository repository)
+        public ITestableHttpResponse PrepareForReplay(ITestableHttpRequest request, RecordedHttpCallRepository repository)
         {
             foreach (var recordedResponse in repository.GetAll())
             {
@@ -33,19 +33,10 @@ namespace LightBDD.Testing.Http.Implementation
                 if (!_responsePredicate.Invoke(updatedResponse))
                     continue;
 
-                Replay(response, updatedResponse);
-                return;
+                return updatedResponse;
             }
 
             throw new InvalidOperationException("No suitable recorded message has been found");
-        }
-
-        private static void Replay(IMockHttpResponse response, ITestableHttpResponse recordedResponse)
-        {
-            response
-                .SetStatusCode(recordedResponse.StatusCode)
-                .SetHeaders(recordedResponse.Headers)
-                .SetContent(recordedResponse.Content.Content, recordedResponse.Content.ContentEncoding, recordedResponse.Content.ContentType);
         }
 
         private ITestableHttpRequest ApplyReplacements(ITestableHttpRequest request)
@@ -56,7 +47,7 @@ namespace LightBDD.Testing.Http.Implementation
             foreach (var replacement in _replacements)
             {
                 ReplaceIf(replacement, ref content, ReplacementOptions.Content);
-                ReplaceIf(replacement, ref relativeUri, ReplacementOptions.Content);
+                ReplaceIf(replacement, ref relativeUri, ReplacementOptions.Uri);
                 ReplaceHeaders(replacement, headers);
             }
 
