@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,7 +17,7 @@ namespace LightBDD.Testing.Tests.Acceptance
         private MockHttpServer _server;
         private RecordingHttpProxy _proxy;
         private TestableHttpClient _client;
-        private readonly RecordedHttpCallRepository _repository = new RecordedHttpCallRepository();
+        private string _recordingsRepositoryPath = AppContext.BaseDirectory + "\\recordings\\" + Guid.NewGuid();
 
         public RecordingHttpProxy_feature(ITestOutputHelper output) : base(output)
         {
@@ -29,7 +30,7 @@ namespace LightBDD.Testing.Tests.Acceptance
 
         private void Given_recording_proxy_for_target_server()
         {
-            _proxy = new RecordingHttpProxy(MockHttpServerHelper.GetNextPort(), _server.BaseAddress, RecordingHttpProxy.Mode.Record, _repository);
+            _proxy = new RecordingHttpProxy(MockHttpServerHelper.GetNextPort(), _server.BaseAddress, RecordingHttpProxy.Mode.Record, new RecordedHttpCallRepository(_recordingsRepositoryPath));
         }
 
         private void Given_test_http_client_pointing_to_the_proxy()
@@ -72,7 +73,7 @@ namespace LightBDD.Testing.Tests.Acceptance
         private void Given_proxy_mode_is_changed_to_replay()
         {
             _proxy.Dispose();
-            _proxy = new RecordingHttpProxy(_proxy.BaseAddress.Port, _server.BaseAddress, RecordingHttpProxy.Mode.Replay, _repository);
+            _proxy = new RecordingHttpProxy(_proxy.BaseAddress.Port, _server.BaseAddress, RecordingHttpProxy.Mode.Replay, new RecordedHttpCallRepository(_recordingsRepositoryPath));
         }
     }
 }

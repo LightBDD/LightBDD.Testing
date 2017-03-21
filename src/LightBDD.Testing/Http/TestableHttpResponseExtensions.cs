@@ -31,7 +31,7 @@ namespace LightBDD.Testing.Http
             builder.AppendLine($"StatusCode: HTTP {(int)response.StatusCode} {response.StatusCode}");
             builder.AppendLine("Headers:");
             foreach (var header in response.Headers)
-                builder.AppendLine($"- {header.Key}: {header.Value.FirstOrDefault()}");
+                builder.AppendLine($"- {header.Key}: {header.Value}");
             builder.AppendLine("Content:");
             builder.AppendLine(response.ToStringContent());
             return builder.ToString();

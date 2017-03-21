@@ -10,7 +10,7 @@ namespace LightBDD.Testing.Http
 
         private static string DetermineResponseLogPath()
         {
-            var path = Path.Combine(AppContext.BaseDirectory, "HttpResponseLogs");
+            var path = Path.Combine(AppContext.BaseDirectory, "ResponseLogs");
             try
             {
                 if (!Directory.Exists(path))
@@ -27,7 +27,7 @@ namespace LightBDD.Testing.Http
 
         public static FileInfo LogResponse(ITestableHttpResponse response)
         {
-            var path = Path.Combine(DefaultHttpResponseLogPath, $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + Interlocked.Increment(ref _counter)}.txt");
+            var path = Path.Combine(DefaultHttpResponseLogPath, $"response-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Interlocked.Increment(ref _counter):D5}.txt");
             File.WriteAllText(path, response.DumpToString());
             return new FileInfo(path);
         }
