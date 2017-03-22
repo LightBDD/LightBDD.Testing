@@ -10,14 +10,21 @@ namespace LightBDD.Testing.Http
 {
     public class TestableHttpClient : IDisposable
     {
-        private readonly HttpClient _client = new HttpClient();
-        public Repeat Repeater { get; private set; } = new Repeat();
+        private readonly HttpClient _client;
+        public Repeat Repeater { get; } = new Repeat();
 
         public TestableHttpClient(Uri baseUri)
         {
             if (baseUri == null)
                 throw new ArgumentNullException(nameof(baseUri));
-            _client.BaseAddress = baseUri;
+            _client = new HttpClient { BaseAddress = baseUri };
+        }
+
+        public TestableHttpClient(HttpClient client)
+        {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client));
+            _client = client;
         }
 
         public HttpRequestHeaders DefaultHeaders => _client.DefaultRequestHeaders;
