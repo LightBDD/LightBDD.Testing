@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +18,8 @@ namespace LightBDD.Testing.Http
         public static T ToJson<T>(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => JsonConvert.DeserializeObject<T>(response.ToStringContent(), settings);
         public static string ToStringContent(this ITestableHttpResponse response) => response.Content.ContentEncoding.GetString(response.Content.Content);
         public static dynamic ToJson(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => JsonConvert.DeserializeObject<ExpandoObject>(response.ToStringContent(), settings);
+
+        public static IEnumerable<dynamic> ToJsonCollection(this ITestableHttpResponse response, JsonSerializerSettings settings = null) => response.ToJson<ExpandoObject[]>(settings);
         public static T ToAnonymousJson<T>(this ITestableHttpResponse response, T expectedModel, JsonSerializerSettings settings = null) => JsonConvert.DeserializeAnonymousType(response.ToStringContent(), expectedModel, settings);
         public static ITestableHttpResponse PrintResponseInComments(this ITestableHttpResponse response)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using LightBDD.Framework;
@@ -70,6 +71,15 @@ namespace LightBDD.Testing.Tests.Acceptance
             Assert.NotNull(_client.LastResponse);
             Assert.Equal(code, _client.LastResponse.StatusCode);
             Assert.Equal(content, _client.LastResponse.ToAnonymousJson(content));
+            Assert.Equal("application/json", _client.LastResponse.Content.Headers["Content-Type"]);
+        }
+
+        private void Then_response_should_contain_status_code_and_json_array_with_names(HttpStatusCode code, params string[] names)
+        {
+            Assert.NotNull(_client.LastResponse);
+            Assert.Equal(code, _client.LastResponse.StatusCode);
+            Assert.Equal(names, _client.LastResponse.ToJsonCollection().Select(x => x.name).ToArray());
+            Assert.Equal("application/json", _client.LastResponse.Content.Headers["Content-Type"]);
         }
 
         private async void When_client_sends_METHOD_URL_request(HttpMethod method, string url)

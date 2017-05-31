@@ -14,7 +14,7 @@ namespace LightBDD.Testing.Http.Implementation
             Method = new HttpMethod(request.HttpMethod);
             RelativeUri = "/" + baseAddress.MakeRelativeUri(request.Url);
             Headers = request.Headers.AllKeys.ToDictionary(key => key, key => request.Headers[key]);
-            Content = new MockHttpContent(content, request.ContentEncoding, request.ContentType);
+            Content = new MockHttpContent(content, request.ContentEncoding, request.ContentType, new Dictionary<string, string>());
             BaseUri = baseAddress;
         }
 

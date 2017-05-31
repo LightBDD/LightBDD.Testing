@@ -28,6 +28,18 @@ I want an define api tests easily")]
         }
 
         [Scenario]
+        public Task Retrieving_json_array_content()
+        {
+            return Runner.RunScenarioActionsAsync(
+                _ => Given_mock_http_server(),
+                _ => Given_test_http_client(),
+                _ => Given_server_configured_for_METHOD_URL_to_return_status_code_with_json_content(HttpMethod.Get, "/customers", HttpStatusCode.OK, new[] { new { name = "John" }, new { name = "Josh" } }),
+                _ => When_client_sends_METHOD_URL_request(HttpMethod.Get, "/customers"),
+                _ => Then_response_should_contain_status_code_and_json_array_with_names(HttpStatusCode.OK, "John", "Josh")
+            );
+        }
+
+        [Scenario]
         public Task Performing_operations_with_content()
         {
             return Runner.RunScenarioActionsAsync(

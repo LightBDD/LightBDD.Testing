@@ -51,7 +51,7 @@ namespace LightBDD.Testing.Http.Implementation
                 ReplaceHeaders(replacement, headers);
             }
 
-            var httpContent = new MockHttpContent(request.Content.ContentEncoding.GetBytes(content), request.Content.ContentEncoding, request.Content.ContentType);
+            var httpContent = new MockHttpContent(request.Content.ContentEncoding.GetBytes(content), request.Content.ContentEncoding, request.Content.ContentType, request.Content.Headers);
             return new MockHttpRequest(request.BaseUri, request.Method, relativeUri, httpContent, headers);
         }
 
@@ -65,7 +65,7 @@ namespace LightBDD.Testing.Http.Implementation
                 ReplaceHeaders(replacement, headers);
             }
 
-            var httpContent = new MockHttpContent(response.Content.ContentEncoding.GetBytes(content), response.Content.ContentEncoding, response.Content.ContentType);
+            var httpContent = new MockHttpContent(response.Content.ContentEncoding.GetBytes(content), response.Content.ContentEncoding, response.Content.ContentType, response.Content.Headers);
             return new TestableHttpResponse(response.Request, response.StatusCode, response.ReasonPhrase, httpContent, headers);
         }
 

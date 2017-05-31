@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 
 namespace LightBDD.Testing.Http
 {
@@ -8,5 +9,6 @@ namespace LightBDD.Testing.Http
         byte[] Content { get; }
         string ContentType { get; }
         long ContentLength { get; }
+        IReadOnlyDictionary<string, string> Headers { get; }
     }
 }

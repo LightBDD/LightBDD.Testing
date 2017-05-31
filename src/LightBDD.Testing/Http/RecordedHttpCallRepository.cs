@@ -93,17 +93,19 @@ namespace LightBDD.Testing.Http
                 Content = model.ContentEncoding.GetString(model.Content);
                 ContentType = model.ContentType;
                 ContentLength = model.ContentLength;
+                Headers = model.Headers.ToDictionary(kv => kv.Key, kv => kv.Value);
             }
 
             public string ContentEncoding { get; set; }
             public string Content { get; set; }
             public string ContentType { get; set; }
             public long ContentLength { get; set; }
+            public Dictionary<string, string> Headers { get; set; }
 
             public ITestableHttpContent Convert()
             {
                 var encoding = Encoding.GetEncoding(ContentEncoding);
-                return new MockHttpContent(encoding.GetBytes(Content), encoding, ContentType);
+                return new MockHttpContent(encoding.GetBytes(Content), encoding, ContentType, Headers);
             }
         }
         class RecordedHttpRequest
