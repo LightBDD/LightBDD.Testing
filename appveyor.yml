@@ -8,7 +8,7 @@ branches:
   - master
 
 build_script:
-- ps: make\make.ps1 -t all
+- cmd: make.cmd
 
 artifacts:
   - path: 'output\*.*'

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using LightBDD.Framework;
-using LightBDD.Framework.Commenting;
 using LightBDD.Testing.Http;
 using LightBDD.Testing.Tests.Helpers;
 using LightBDD.XUnit2;
